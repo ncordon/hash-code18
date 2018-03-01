@@ -18,7 +18,15 @@ int operator-(position& a, position& b) {
 class ride_comparison{
 public:
   bool operator()(Ride& a, Ride& b){
-    return a.t_start > b.t_start;
+    if (a.t_start == b.t_start) {
+      if (a.t_end == b.t_end) {
+        return (a.start - a.end) < (b.start - b.end);
+      } else {
+        return a.t_end > b.t_end;
+      }
+    } else {
+      return a.t_start > b.t_start;
+    }
   }
 };
 
