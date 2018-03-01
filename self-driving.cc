@@ -18,7 +18,11 @@ int operator-(position& a, position& b) {
 class ride_comparison{
 public:
   bool operator()(Ride& a, Ride& b){
-    return a.t_start > b.t_start;
+    if(a.t_start == b.t_start) {
+      return a.start - a.end > b.start - b.end;
+    }
+    else
+      return a.t_start > b.t_start;
   }
 };
 
@@ -68,6 +72,7 @@ int main() {
   }
 
   for (long long t = 0; t < T; t++) {
+    vector<Ride> discarded;
     // v = vehicle
     // decrease remaining time to end if vehicle v if it is being used
     for (int v = 0; v < F; v++) {
@@ -113,15 +118,15 @@ int main() {
           steps_remaining[closest] = current_ride.end - vehicle_position[closest];
           solution[closest].push_back(current_ride.id);
           rides_used[current_ride.id] = true;
-        }
+        } else if (current_ride.t_end > t) {
+          discarded.push_back(current_ride);
+        } 
       }
       // Re-evaluate if any car would be able to finish this ride
-      /*
-     if(!can_assign) {
-        if(rides.t_
+    }
 
-      }
-      */
+    for (Ride& x : discarded) {
+      rides.push(x);
     }
   }
 
