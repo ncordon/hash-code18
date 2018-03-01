@@ -18,24 +18,28 @@ int operator-(position& a, position& b) {
 class ride_comparison{
 public:
   bool operator()(Ride& a, Ride& b){
-    if(a.t_start == b.t_start) {
-      return a.start - a.end > b.start - b.end;
-    }
-    else
+    if (a.t_start == b.t_start) {
+      if (a.t_end == b.t_end) {
+        return (a.start - a.end) < (b.start - b.end);
+      } else {
+        return a.t_end > b.t_end;
+      }
+    } else {
       return a.t_start > b.t_start;
+    }
   }
 };
 
 
-int score(position car, Ride r, long long step, int bonus) {
+double score(position car, Ride r, long long step, int bonus) {
   bool would_start = step + (car - r.start) <= r.t_start;
-  int would_end = (car - r.start) + (r.start - r.end);
+  int would_end = step + (car - r.start) + (r.start - r.end);
   int diff = r.t_end - would_end;
 
   if (diff > 0)
-    return would_start * bonus + (r.start - r.end);
+    return (would_start * bonus + (r.start - r.end)) - (r.start - car);
   else
-    return 0;
+    return numeric_limits<double>::min();
 }
 
 void print_solution(vector<list<int> >& solution) {
@@ -91,20 +95,20 @@ int main() {
 
     bool can_assign = true;
     
-    while(!rides.empty() && can_assign){
+    while(!rides.empty() && can_assign) {
       Ride current_ride = rides.top();
       rides.pop();
       can_assign = false;
       
       if(!rides_used[current_ride.id]) {
         int closest = -1;
-        int max_score = numeric_limits<int>::min();
+        double max_score = numeric_limits<double>::min();
       
         for(int v = 0; v < F; v++) {
           if(!vehicle_used[v]){
-            int v_score = score(vehicle_position[v], current_ride, t, B);
+            double v_score = score(vehicle_position[v], current_ride, t, B);
 
-            if(v_score > max_score && v_score > 0){
+            if(v_score > max_score){
               can_assign = true;
               closest = v;
               max_score = v_score;
@@ -115,7 +119,9 @@ int main() {
         if(can_assign) {
           vehicle_ride[closest] = current_ride;
           vehicle_used[closest] = true;
-          steps_remaining[closest] = current_ride.end - vehicle_position[closest];
+          steps_remaining[closest] = current_ride.end - current_ride.start;
+          current_ride.t_start = max(current_ride.t_start,
+                                     t + (current_ride.start - vehicle_position[closest]));
           solution[closest].push_back(current_ride.id);
           rides_used[current_ride.id] = true;
         } else if (current_ride.t_end > t) {
