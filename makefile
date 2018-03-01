@@ -1,0 +1,1 @@
+default: $(basename $(wildcard *.cc))
